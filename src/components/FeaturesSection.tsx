@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Image as ImageIcon } from 'lucide-react'
 
 const BG_IMAGE =
   'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260709_082449_46df5cc4-ad98-4541-9236-a2659c1478a4.png&w=1920&q=85'
@@ -134,6 +135,11 @@ function ProjectCard({
       <ProjectLogo />
       <h3 className="text-xl font-medium text-white md:text-2xl">{project.title}</h3>
 
+      {/* Image placeholder */}
+      <div className="flex aspect-video items-center justify-center overflow-hidden rounded-2xl bg-white/5">
+        <ImageIcon className="text-white/20" size={40} strokeWidth={1.5} />
+      </div>
+
       {/* Team */}
       <div className="flex flex-wrap items-center gap-3">
         <MetaLabel>Team</MetaLabel>
@@ -236,7 +242,7 @@ export default function FeaturesSection() {
         </div>
 
         {/* Right column — the only scroller on desktop */}
-        <div className="flex flex-1 flex-col gap-16 md:gap-24 lg:h-screen lg:overflow-y-auto lg:py-32">
+        <div className="scrollbar-hide flex flex-1 flex-col gap-16 md:gap-24 lg:h-screen lg:overflow-y-auto lg:py-32">
           {PROJECTS.map((project, i) => (
             <ProjectCard
               key={project.title}
