@@ -3,37 +3,50 @@ import { useEffect, useRef, useState } from 'react'
 const BG_IMAGE =
   'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260709_082449_46df5cc4-ad98-4541-9236-a2659c1478a4.png&w=1920&q=85'
 
-type Feature = {
+type Project = {
   title: string
+  team: string
   description: string
-  video: string
+  impact: string
+  startDate: string
+  launchDate: string
+  endDate: string
 }
 
-const FEATURES: Feature[] = [
+const PROJECTS: Project[] = [
   {
-    title: 'Built for ease, not urgency',
-    description:
-      'Drift strips away the noise that makes organizing feel draining. Every surface is made to be soft, quiet, and intuitive so you can move forward, not get stuck decoding.',
-    video:
-      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_102608_5fa1187d-9ac6-44fb-82ab-54376200abc0.mp4',
+    title: 'PayLater Revamp',
+    team: 'Steven Joan',
+    description: '',
+    impact: '',
+    startDate: '',
+    launchDate: '',
+    endDate: '',
   },
   {
-    title: 'The gentlest way to start',
+    title: 'KUBER × TTD & Performance Marketing',
+    team: 'Trista Chlorellano Garno',
     description:
-      'Beginning your day should feel natural, not daunting. Drift eases you into motion with subtle cues and a quiet view of what deserves your energy right now.',
-    video:
-      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260625_174131_395bc785-bb21-4e65-abf6-27c56f0764b6.mp4',
+      'Designed and executed alignment workshops to bridge TTD Commercial, Performance Marketing, and Pricing teams regarding needs on Pricing and Promo Dashboards.',
+    impact:
+      'Directly resulted in >20 distinct items ready to act upon and >15 items funneled into planned technical development.',
+    startDate: '30 Mar 2026',
+    launchDate: '10 Jul 2026',
+    endDate: '10 Jul 2026',
   },
   {
-    title: 'Deep, undivided focus',
-    description:
-      'No interruptions, no clutter. Drift holds you in the present task with a stripped-back layout that softens all else until you are truly ready to shift.',
-    video:
-      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260525_052706_d2e390fd-1846-4fe7-a4d8-8d2f1c875358.mp4',
+    title: 'FDS Popup Revamp',
+    team: 'Christopher Christopher',
+    description: 'Improved FDS Pop-up design on Flight.',
+    impact:
+      'Total Conversions uplift ▲203.79% — [Post Analysis] FDS New Pricing 22 April Scheme Experiment.',
+    startDate: 'March 2026',
+    launchDate: '22 April 2026 (Start experiment)',
+    endDate: '6 May 2026 (End experiment)',
   },
 ]
 
-function FeatureLogo() {
+function ProjectLogo() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -50,13 +63,21 @@ function FeatureLogo() {
   )
 }
 
-function FeatureCard({
-  feature,
+function MetaLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-xs font-semibold uppercase tracking-widest text-white/40">
+      {children}
+    </span>
+  )
+}
+
+function ProjectCard({
+  project,
   index,
   onActive,
   registerRef,
 }: {
-  feature: Feature
+  project: Project
   index: number
   onActive: (index: number) => void
   registerRef: (index: number, el: HTMLElement | null) => void
@@ -110,21 +131,52 @@ function FeatureCard({
         revealed ? 'translate-x-0 opacity-100' : 'translate-x-16 opacity-0'
       }`}
     >
-      <FeatureLogo />
-      <h3 className="text-xl font-medium text-white md:text-2xl">{feature.title}</h3>
-      <div className="aspect-video overflow-hidden rounded-2xl bg-black/30">
-        <video
-          className="h-full w-full object-cover"
-          src={feature.video}
-          autoPlay
-          muted
-          loop
-          playsInline
-        />
+      <ProjectLogo />
+      <h3 className="text-xl font-medium text-white md:text-2xl">{project.title}</h3>
+
+      {/* Team */}
+      <div className="flex flex-wrap items-center gap-3">
+        <MetaLabel>Team</MetaLabel>
+        <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/80">
+          {project.team}
+        </span>
       </div>
-      <p className="text-sm font-medium leading-relaxed text-white/60 md:text-base">
-        {feature.description}
-      </p>
+
+      {/* Description */}
+      {project.description && (
+        <div className="flex flex-col gap-1.5">
+          <MetaLabel>Description</MetaLabel>
+          <p className="text-sm font-medium leading-relaxed text-white/60 md:text-base">
+            {project.description}
+          </p>
+        </div>
+      )}
+
+      {/* Impact */}
+      {project.impact && (
+        <div className="flex flex-col gap-1.5 rounded-2xl bg-white/5 p-4 md:p-5">
+          <MetaLabel>Impact</MetaLabel>
+          <p className="text-sm font-medium leading-relaxed text-white md:text-base">
+            {project.impact}
+          </p>
+        </div>
+      )}
+
+      {/* Dates */}
+      <div className="grid grid-cols-3 gap-4 border-t border-white/10 pt-6">
+        <div className="flex flex-col gap-1">
+          <MetaLabel>Start</MetaLabel>
+          <p className="text-sm font-medium text-white/80">{project.startDate || 'TBD'}</p>
+        </div>
+        <div className="flex flex-col gap-1">
+          <MetaLabel>Launch</MetaLabel>
+          <p className="text-sm font-medium text-white/80">{project.launchDate || 'TBD'}</p>
+        </div>
+        <div className="flex flex-col gap-1">
+          <MetaLabel>End</MetaLabel>
+          <p className="text-sm font-medium text-white/80">{project.endDate || 'TBD'}</p>
+        </div>
+      </div>
     </article>
   )
 }
@@ -142,60 +194,53 @@ export default function FeaturesSection() {
   }
 
   return (
-    <section className="relative px-5 py-20 md:px-10 md:py-40 lg:px-16 lg:py-48">
+    <section className="relative px-5 py-20 md:px-10 md:py-40 lg:h-screen lg:overflow-hidden lg:px-16 lg:py-0">
       {/* Fixed background image */}
       <div
         className="fixed inset-0 -z-10 bg-cover bg-center"
         style={{ backgroundImage: `url("${BG_IMAGE}")` }}
       />
 
-      <div className="mx-auto grid max-w-7xl gap-24 lg:grid-cols-[400px_1fr] xl:grid-cols-[460px_1fr] xl:gap-48">
-        {/* Left column (sticky on desktop) */}
-        <div className="lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-between lg:pb-32">
-          <div>
-            <h2 className="text-2xl font-normal leading-[1.2] text-white sm:text-3xl lg:text-[46px]">
-              Krakatoa's Projects
-            </h2>
-            <p className="mt-5 max-w-md text-sm font-medium leading-relaxed text-white/60 md:text-base">
-              Home base for everything we're building — Pricing, Promo, Insurance,
-              Payment, PayLater, and Refund, all in one spot.
-            </p>
-          </div>
+      <div className="mx-auto flex max-w-7xl flex-col gap-24 lg:h-screen lg:flex-row xl:gap-48">
+        {/* Left column — fixed, unaffected by scroll */}
+        <div className="flex flex-col lg:h-screen lg:w-[400px] lg:shrink-0 lg:justify-start lg:pt-32 xl:w-[460px]">
+          {/* Heading + nav buttons grouped, aligned to top */}
+          <div className="flex flex-col gap-10">
+            <div>
+              <h2 className="text-2xl font-normal leading-[1.2] text-white sm:text-3xl lg:text-[46px]">
+                Krakatoa's Projects
+              </h2>
+              <p className="mt-5 max-w-md text-sm font-medium leading-relaxed text-white/60 md:text-base">
+                Home base for everything we're building — Pricing, Promo, Insurance,
+                Payment, PayLater, and Refund, all in one spot.
+              </p>
+            </div>
 
-          {/* Feature nav buttons */}
-          <div className="hidden flex-col gap-3 lg:flex">
-            {FEATURES.map((feature, i) => (
-              <button
-                key={feature.title}
-                onClick={() => scrollToCard(i)}
-                className={`rounded-xl px-4 py-3 text-left text-base font-medium transition-colors ${
-                  activeIndex === i
-                    ? 'bg-black/20 text-white'
-                    : 'bg-black/20 text-white/40'
-                }`}
-              >
-                {feature.title}
-              </button>
-            ))}
-          </div>
-
-          {/* Bottom CTA */}
-          <div className="hidden items-center gap-4 rounded-xl bg-black/25 py-1 pl-6 pr-1 backdrop-blur-md lg:flex">
-            <span className="text-sm font-medium text-white">
-              No noise. No complicated systems. Just your day, gently sorted.
-            </span>
-            <button className="shrink-0 rounded-xl bg-white px-5 py-2.5 text-sm font-medium text-black transition-colors hover:bg-white/90">
-              Start for free
-            </button>
+            {/* Project nav buttons */}
+            <div className="hidden flex-col gap-3 lg:flex">
+              {PROJECTS.map((project, i) => (
+                <button
+                  key={project.title}
+                  onClick={() => scrollToCard(i)}
+                  className={`rounded-xl px-4 py-3 text-left text-base font-medium transition-colors ${
+                    activeIndex === i
+                      ? 'bg-black/20 text-white'
+                      : 'bg-black/20 text-white/40'
+                  }`}
+                >
+                  {project.title}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Right column (scrolling cards) */}
-        <div className="flex flex-col gap-16 md:gap-24">
-          {FEATURES.map((feature, i) => (
-            <FeatureCard
-              key={feature.title}
-              feature={feature}
+        {/* Right column — the only scroller on desktop */}
+        <div className="flex flex-1 flex-col gap-16 md:gap-24 lg:h-screen lg:overflow-y-auto lg:py-32">
+          {PROJECTS.map((project, i) => (
+            <ProjectCard
+              key={project.title}
+              project={project}
               index={i}
               onActive={setActiveIndex}
               registerRef={registerRef}
