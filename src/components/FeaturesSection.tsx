@@ -4,9 +4,15 @@ import { Image as ImageIcon } from 'lucide-react'
 const BG_IMAGE =
   'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260709_082449_46df5cc4-ad98-4541-9236-a2659c1478a4.png&w=1920&q=85'
 
+type TeamMember = {
+  name: string
+  avatar: string
+}
+
 type Project = {
   title: string
-  team: string
+  team: TeamMember[]
+  image?: string
   description: string
   impact: string
   startDate: string
@@ -17,7 +23,7 @@ type Project = {
 const PROJECTS: Project[] = [
   {
     title: 'PayLater Revamp',
-    team: 'Steven Joan',
+    team: [{ name: 'Steven Joan', avatar: '/team/Joan.png' }],
     description: '',
     impact: '',
     startDate: '',
@@ -26,7 +32,7 @@ const PROJECTS: Project[] = [
   },
   {
     title: 'KUBER × TTD & Performance Marketing',
-    team: 'Trista Chlorellano Garno',
+    team: [{ name: 'Trista Chlorellano Garno', avatar: '/team/Trista.png' }],
     description:
       'Designed and executed alignment workshops to bridge TTD Commercial, Performance Marketing, and Pricing teams regarding needs on Pricing and Promo Dashboards.',
     impact:
@@ -37,7 +43,8 @@ const PROJECTS: Project[] = [
   },
   {
     title: 'FDS Popup Revamp',
-    team: 'Christopher Christopher',
+    team: [{ name: 'Christopher Christopher', avatar: '/team/Chris.png' }],
+    image: '/FDS.png',
     description: 'Improved FDS Pop-up design on Flight.',
     impact:
       'Total Conversions uplift ▲203.79% — [Post Analysis] FDS New Pricing 22 April Scheme Experiment.',
@@ -46,23 +53,6 @@ const PROJECTS: Project[] = [
     endDate: '6 May 2026 (End experiment)',
   },
 ]
-
-function ProjectLogo() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="40"
-      height="40"
-      viewBox="0 0 256 256"
-      fill="none"
-    >
-      <path
-        d="M 256 256 L 178 256 C 150.386 256 128 233.614 128 206 L 128 256 L 0 256 L 0 192 C 0 156.654 28.654 128 64 128 C 99.346 128 128 156.654 128 192 L 128 128 L 256 128 Z M 78 0 C 105.614 0 128 22.386 128 50 L 128 0 L 256 0 L 256 64 C 256 99.346 227.346 128 192 128 C 156.654 128 128 99.346 128 64 L 128 128 L 0 128 L 0 0 Z"
-        fill="rgba(255,255,255,0.8)"
-      />
-    </svg>
-  )
-}
 
 function MetaLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -132,20 +122,38 @@ function ProjectCard({
         revealed ? 'translate-x-0 opacity-100' : 'translate-x-16 opacity-0'
       }`}
     >
-      <ProjectLogo />
       <h3 className="text-xl font-medium text-white md:text-2xl">{project.title}</h3>
 
-      {/* Image placeholder */}
+      {/* Image (or placeholder) */}
       <div className="flex aspect-video items-center justify-center overflow-hidden rounded-2xl bg-white/5">
-        <ImageIcon className="text-white/20" size={40} strokeWidth={1.5} />
+        {project.image ? (
+          <img
+            src={project.image}
+            alt={project.title}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <ImageIcon className="text-white/20" size={40} strokeWidth={1.5} />
+        )}
       </div>
 
       {/* Team */}
       <div className="flex flex-wrap items-center gap-3">
         <MetaLabel>Team</MetaLabel>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/80">
-          {project.team}
-        </span>
+        <div className="flex items-center -space-x-2">
+          {project.team.map((member) => (
+            <div key={member.name} className="group/avatar relative">
+              <img
+                src={member.avatar}
+                alt={member.name}
+                className="h-10 w-10 rounded-full object-cover ring-2 ring-black/30 transition-transform duration-200 hover:z-10 hover:scale-105"
+              />
+              <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-black/80 px-2.5 py-1 text-xs font-medium text-white opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover/avatar:opacity-100">
+                {member.name}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Description */}
