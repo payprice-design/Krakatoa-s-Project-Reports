@@ -1,17 +1,37 @@
 import { useEffect, useRef, useState } from 'react'
 import { Image as ImageIcon } from 'lucide-react'
+import fdsImage from '../../card-templates/03-fds-popup-revamp/FDS.png'
+import fdsImageCopy from '../../card-templates/04-fds-popup-revamp copy/FDS.png'
 
 const BG_IMAGE =
   'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260709_082449_46df5cc4-ad98-4541-9236-a2659c1478a4.png&w=1920&q=85'
 
 type TeamMember = {
   name: string
-  avatar: string
+  /** Image filename inside /public/team (defaults to `<key>.png`). */
+  file?: string
+}
+
+// Central roster. Add a collaborator here once — their avatar is pulled from
+// /public/team/<file> (defaults to <key>.png). Reference them from a project's
+// `team` array by key; a project can list as many collaborators as needed.
+const TEAM: Record<string, TeamMember> = {
+  joan: { name: 'Steven Joan' },
+  trista: { name: 'Trista Chlorellano Garno' },
+  chris: { name: 'Christopher Christopher' },
+  adit: { name: 'Adit Septian', file: 'Adit.jpg' },
+  asad: { name: 'Asad' },
+}
+
+const avatarSrc = (key: string) => `/team/${TEAM[key]?.file ?? `${capitalize(key)}.png`}`
+
+function capitalize(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 type Project = {
   title: string
-  team: TeamMember[]
+  team: string[] // keys into TEAM — supports multiple collaborators
   image?: string
   description: string
   impact: string
@@ -23,7 +43,7 @@ type Project = {
 const PROJECTS: Project[] = [
   {
     title: 'PayLater Revamp',
-    team: [{ name: 'Steven Joan', avatar: '/team/Joan.png' }],
+    team: ['joan'],
     description: '',
     impact: '',
     startDate: '',
@@ -32,7 +52,7 @@ const PROJECTS: Project[] = [
   },
   {
     title: 'KUBER × TTD & Performance Marketing',
-    team: [{ name: 'Trista Chlorellano Garno', avatar: '/team/Trista.png' }],
+    team: ['trista'],
     description:
       'Designed and executed alignment workshops to bridge TTD Commercial, Performance Marketing, and Pricing teams regarding needs on Pricing and Promo Dashboards.',
     impact:
@@ -43,11 +63,22 @@ const PROJECTS: Project[] = [
   },
   {
     title: 'FDS Popup Revamp',
-    team: [{ name: 'Christopher Christopher', avatar: '/team/Chris.png' }],
-    image: '/FDS.png',
+    team: ['chris'],
+    image: fdsImage,
     description: 'Improved FDS Pop-up design on Flight.',
     impact:
-      'Total Conversions uplift ▲203.79% — [Post Analysis] FDS New Pricing 22 April Scheme Experiment.',
+      'Total Conversions uplift ▲+141% — [Post Analysis] FDS New Pricing 22 April Scheme Experiment.',
+    startDate: 'March 2026',
+    launchDate: '22 April 2026 (Start experiment)',
+    endDate: '6 May 2026 (End experiment)',
+  },
+  {
+    title: 'FDS Popup Revamp',
+    team: ['chris', 'adit'],
+    image: fdsImageCopy,
+    description: 'Improved FDS Pop-up design on Flight.',
+    impact:
+      'Total Conversions uplift ▲+141% — [Post Analysis] FDS New Pricing 22 April Scheme Experiment.',
     startDate: 'March 2026',
     launchDate: '22 April 2026 (Start experiment)',
     endDate: '6 May 2026 (End experiment)',
@@ -118,7 +149,7 @@ function ProjectCard({
         cardRef.current = el
         registerRef(index, el)
       }}
-      className={`flex flex-col gap-6 rounded-3xl bg-black/20 p-6 backdrop-blur-sm transition-all duration-700 ease-out md:p-10 ${
+      className={`flex flex-col gap-6 rounded-3xl bg-black/20 p-6 backdrop-blur-sm transition-all duration-700 ease-out md:p-10 lg:scroll-mt-32 ${
         revealed ? 'translate-x-0 opacity-100' : 'translate-x-16 opacity-0'
       }`}
     >
@@ -141,18 +172,22 @@ function ProjectCard({
       <div className="flex flex-wrap items-center gap-3">
         <MetaLabel>Team</MetaLabel>
         <div className="flex items-center -space-x-2">
-          {project.team.map((member) => (
-            <div key={member.name} className="group/avatar relative">
-              <img
-                src={member.avatar}
-                alt={member.name}
-                className="h-10 w-10 rounded-full object-cover ring-2 ring-black/30 transition-transform duration-200 hover:z-10 hover:scale-105"
-              />
-              <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-black/80 px-2.5 py-1 text-xs font-medium text-white opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover/avatar:opacity-100">
-                {member.name}
-              </span>
-            </div>
-          ))}
+          {project.team.map((key) => {
+            const member = TEAM[key]
+            if (!member) return null
+            return (
+              <div key={key} className="group/avatar relative">
+                <img
+                  src={avatarSrc(key)}
+                  alt={member.name}
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-black/30 transition-transform duration-200 hover:z-10 hover:scale-105"
+                />
+                <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-black/80 px-2.5 py-1 text-xs font-medium text-white opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover/avatar:opacity-100">
+                  {member.name}
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -204,7 +239,7 @@ export default function FeaturesSection() {
   }
 
   const scrollToCard = (index: number) => {
-    cardRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    cardRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
@@ -234,7 +269,7 @@ export default function FeaturesSection() {
             <div className="hidden flex-col gap-3 lg:flex">
               {PROJECTS.map((project, i) => (
                 <button
-                  key={project.title}
+                  key={i}
                   onClick={() => scrollToCard(i)}
                   className={`rounded-xl px-4 py-3 text-left text-base font-medium transition-colors ${
                     activeIndex === i
@@ -253,7 +288,7 @@ export default function FeaturesSection() {
         <div className="scrollbar-hide flex flex-1 flex-col gap-16 md:gap-24 lg:h-screen lg:overflow-y-auto lg:py-32">
           {PROJECTS.map((project, i) => (
             <ProjectCard
-              key={project.title}
+              key={i}
               project={project}
               index={i}
               onActive={setActiveIndex}

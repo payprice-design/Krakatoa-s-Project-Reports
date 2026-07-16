@@ -1,0 +1,9 @@
+TITLE: FDS Popup Revamp
+TEAM: Christopher Christopher
+TEAM AVATAR: Chris.png
+IMAGE: FDS.png
+DESCRIPTION: Improved FDS Pop-up design on Flight.
+IMPACT: Total Conversions uplift ▲+141% — [Post Analysis] FDS New Pricing 22 April Scheme Experiment.
+START DATE: March 2026
+LAUNCH DATE: 22 April 2026 (Start experiment)
+END DATE: 6 May 2026 (End experiment)
