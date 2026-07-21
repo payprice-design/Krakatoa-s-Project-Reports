@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Image as ImageIcon, Moon, Sun } from 'lucide-react'
 import fdsImage from '../../card-templates/03-fds-popup-revamp/FDS.png'
 import fdsImageCopy from '../../card-templates/04-fds-popup-revamp copy/FDS.png'
+import paylaterImage from '../../card-templates/01-paylater-revamp/PayLater.jpg'
 import DotField from './DotField'
 
 type Theme = 'dark' | 'light'
@@ -151,9 +152,11 @@ const PROJECTS: Project[] = [
   {
     title: 'PayLater Revamp',
     team: ['joan'],
-    description: '',
+    image: paylaterImage,
+    description:
+      'Migrate the PayLater USP page from a static, hardcoded asset to a dynamic, module-based system that serves personalized content by user segment and lets the business team update content and run A/B tests via a self-serve configuration dashboard without requiring engineering deployment in order to reduce drop-off and improve operational agility.',
     impact: '',
-    startDate: '',
+    startDate: 'Sep 2025',
     launchDate: '',
     endDate: '',
   },
