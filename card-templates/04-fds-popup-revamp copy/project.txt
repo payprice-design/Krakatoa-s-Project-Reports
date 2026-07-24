@@ -1,7 +1,8 @@
 TITLE: FDS Popup Revamp
 TEAM: Christopher Christopher, Adit
-TEAM AVATAR: Chris.png, Adit.png
+TEAM AVATAR: Chris.png, Adit.jpg
 IMAGE: FDS.png
+VIDEO:
 DESCRIPTION: Improved FDS Pop-up design on Flight.
 IMPACT: Total Conversions uplift ▲+141% — [Post Analysis] FDS New Pricing 22 April Scheme Experiment.
 START DATE: March 2026

@@ -2,8 +2,10 @@ TITLE: PayLater Revamp
 TEAM: Steven Joan
 TEAM AVATAR: Joan.png
 IMAGE: PayLater.jpg
-DESCRIPTION: Migrate the PayLater USP page from a static, hardcoded asset to a dynamic, module-based system that serves personalized content by user segment and lets the business team update content and run A/B tests via a self-serve configuration dashboard without requiring engineering deployment in order to reduce drop-off and improve operational agility.
-IMPACT:
-START DATE: Sep 2025
-LAUNCH DATE:
+VIDEO: animo-column-drift.webm
+DESCRIPTION: Migrate the PayLater USP page from a static, hardcoded asset to a dynamic, module-based system that serves personalized content by user segment and lets the business team update content without requiring engineering deployment.
+IMPACT: • Incoming applications tripled in 4 months: 70k (Feb) → 207k (Jun 2026), +196% growth
+• H1 2026 hit 92% of full-year 2025 volume in half the time (~840k applications)
+START DATE: SEP 2025
+LAUNCH DATE: JAN 2026
 END DATE:

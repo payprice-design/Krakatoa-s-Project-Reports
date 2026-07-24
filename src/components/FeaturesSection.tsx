@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Image as ImageIcon, Moon, Sun } from 'lucide-react'
-import fdsImage from '../../card-templates/03-fds-popup-revamp/FDS.png'
-import fdsImageCopy from '../../card-templates/04-fds-popup-revamp copy/FDS.png'
-import paylaterImage from '../../card-templates/01-paylater-revamp/PayLater.jpg'
-import DotField from './DotField'
+import BorderGlow from './BorderGlow'
+import DotGrid from './DotGrid'
 
 type Theme = 'dark' | 'light'
 
@@ -27,26 +25,81 @@ function useTheme() {
 
 type TeamMember = {
   name: string
-  /** Image filename inside /public/team (defaults to `<key>.png`). */
-  file?: string
+  avatar: string
 }
 
-// Central roster. Add a collaborator here once — their avatar is pulled from
-// /public/team/<file> (defaults to <key>.png). Reference them from a project's
-// `team` array by key; a project can list as many collaborators as needed.
-const TEAM: Record<string, TeamMember> = {
-  joan: { name: 'Steven Joan' },
-  trista: { name: 'Trista Chlorellano Garno' },
-  chris: { name: 'Christopher Christopher' },
-  adit: { name: 'Adit Septian', file: 'Adit.jpg' },
-  asad: { name: 'Asad' },
+// --- Local "properties" loading -------------------------------------------
+// Each project's content lives in card-templates/<slug>/project.txt (its
+// "local properties"). We read those files at build/dev time so editing one
+// updates the preview live via Vite HMR — no code change needed. Assets
+// (image/video/avatars) referenced by filename resolve to the files sitting
+// next to their project.txt.
+
+// Raw text of every project.txt, keyed by module path.
+const projectFiles = import.meta.glob('../../card-templates/*/project.txt', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>
+
+// Every image/video in the card-templates folders, resolved to a URL.
+const mediaFiles = import.meta.glob('../../card-templates/*/*.{jpg,jpeg,png,webp,webm}', {
+  query: '?url',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>
+
+const basename = (path: string) => path.slice(path.lastIndexOf('/') + 1)
+const dirOf = (path: string) => path.slice(0, path.lastIndexOf('/'))
+
+// filename -> URL, so avatars can be found regardless of which folder holds them.
+const mediaByName: Record<string, string> = {}
+for (const p in mediaFiles) mediaByName[basename(p)] = mediaFiles[p]
+
+// Resolve a filename from a project.txt to a real asset URL: prefer the file
+// sitting in the same folder, then any card-templates folder, then /public/team.
+function resolveMedia(dir: string, file: string): string | undefined {
+  if (!file) return undefined
+  return mediaFiles[`${dir}/${file}`] ?? mediaByName[file] ?? `/team/${file}`
 }
 
-const avatarSrc = (key: string) => `/team/${TEAM[key]?.file ?? `${capitalize(key)}.png`}`
+const PROJECT_FIELDS = [
+  'TITLE',
+  'TEAM',
+  'TEAM AVATAR',
+  'IMAGE',
+  'VIDEO',
+  'DESCRIPTION',
+  'IMPACT',
+  'START DATE',
+  'LAUNCH DATE',
+  'END DATE',
+] as const
 
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1)
+// Parse the `KEY: value` format. A line whose leading token is a known field
+// starts a new field; any other line is appended to the current field, so
+// DESCRIPTION and IMPACT can span multiple lines (e.g. bulleted impact).
+function parseProjectFile(raw: string): Record<string, string> {
+  const data: Record<string, string> = {}
+  let currentKey: string | null = null
+  for (const line of raw.split(/\r?\n/)) {
+    const m = line.match(/^([A-Z][A-Z ]*?):\s?(.*)$/)
+    if (m && (PROJECT_FIELDS as readonly string[]).includes(m[1])) {
+      currentKey = m[1]
+      data[currentKey] = m[2]
+    } else if (currentKey) {
+      data[currentKey] += `\n${line}`
+    }
+  }
+  for (const k in data) data[k] = data[k].trim()
+  return data
 }
+
+const splitList = (value = '') =>
+  value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
 
 // Matches impact metrics like "▲+141%", ">20", ">=15", "-12%", "3x" — but not
 // plain numbers/years/dates (e.g. "2026", "22 April").
@@ -139,8 +192,10 @@ function highlightMetrics(text: string) {
 
 type Project = {
   title: string
-  team: string[] // keys into TEAM — supports multiple collaborators
+  team: TeamMember[]
   image?: string
+  /** Optional video shown in the media slot; `image` acts as its poster/fallback. */
+  video?: string
   description: string
   impact: string
   startDate: string
@@ -148,52 +203,32 @@ type Project = {
   endDate: string
 }
 
-const PROJECTS: Project[] = [
-  {
-    title: 'PayLater Revamp',
-    team: ['joan'],
-    image: paylaterImage,
-    description:
-      'Migrate the PayLater USP page from a static, hardcoded asset to a dynamic, module-based system that serves personalized content by user segment and lets the business team update content and run A/B tests via a self-serve configuration dashboard without requiring engineering deployment in order to reduce drop-off and improve operational agility.',
-    impact: '',
-    startDate: 'Sep 2025',
-    launchDate: '',
-    endDate: '',
-  },
-  {
-    title: 'KUBER × TTD & Performance Marketing',
-    team: ['trista'],
-    description:
-      'Designed and executed alignment workshops to bridge TTD Commercial, Performance Marketing, and Pricing teams regarding needs on Pricing and Promo Dashboards.',
-    impact:
-      'Directly resulted in >20 distinct items ready to act upon and >15 items funneled into planned technical development.',
-    startDate: '30 Mar 2026',
-    launchDate: '10 Jul 2026',
-    endDate: '10 Jul 2026',
-  },
-  {
-    title: 'FDS Popup Revamp',
-    team: ['chris'],
-    image: fdsImage,
-    description: 'Improved FDS Pop-up design on Flight.',
-    impact:
-      'Total Conversions uplift ▲+141% — [Post Analysis] FDS New Pricing 22 April Scheme Experiment.',
-    startDate: 'March 2026',
-    launchDate: '22 April 2026 (Start experiment)',
-    endDate: '6 May 2026 (End experiment)',
-  },
-  {
-    title: 'FDS Popup Revamp',
-    team: ['chris', 'adit'],
-    image: fdsImageCopy,
-    description: 'Improved FDS Pop-up design on Flight.',
-    impact:
-      'Total Conversions uplift ▲+141% — [Post Analysis] FDS New Pricing 22 April Scheme Experiment.',
-    startDate: 'March 2026',
-    launchDate: '22 April 2026 (Start experiment)',
-    endDate: '6 May 2026 (End experiment)',
-  },
-]
+// Build the card list from the local project.txt files, ordered by folder name
+// (01-, 02-, …). The `_template` scaffold is skipped. Editing any project.txt
+// re-runs this via HMR, so the preview always mirrors the local files.
+const PROJECTS: Project[] = Object.keys(projectFiles)
+  .filter((path) => !path.includes('/_template/'))
+  .sort()
+  .map((path) => {
+    const dir = dirOf(path)
+    const data = parseProjectFile(projectFiles[path])
+    const names = splitList(data.TEAM)
+    const avatars = splitList(data['TEAM AVATAR'])
+    return {
+      title: data.TITLE ?? '',
+      team: names.map((name, i) => ({
+        name,
+        avatar: resolveMedia(dir, avatars[i] ?? '') ?? '',
+      })),
+      image: resolveMedia(dir, data.IMAGE),
+      video: resolveMedia(dir, data.VIDEO),
+      description: data.DESCRIPTION ?? '',
+      impact: data.IMPACT ?? '',
+      startDate: data['START DATE'] ?? '',
+      launchDate: data['LAUNCH DATE'] ?? '',
+      endDate: data['END DATE'] ?? '',
+    }
+  })
 
 function MetaLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -215,7 +250,24 @@ function ProjectCard({
   registerRef: (index: number, el: HTMLElement | null) => void
 }) {
   const cardRef = useRef<HTMLElement | null>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
   const [revealed, setRevealed] = useState(false)
+  const [hovered, setHovered] = useState(false)
+
+  // Crossfade the poster image and the video on hover: play (from the start)
+  // while fading the video in, then pause while fading back to the poster.
+  const handleEnter = () => {
+    setHovered(true)
+    const v = videoRef.current
+    if (v) {
+      v.currentTime = 0
+      v.play().catch(() => {})
+    }
+  }
+  const handleLeave = () => {
+    setHovered(false)
+    videoRef.current?.pause()
+  }
 
   useEffect(() => {
     const el = cardRef.current
@@ -259,15 +311,53 @@ function ProjectCard({
         cardRef.current = el
         registerRef(index, el)
       }}
-      className={`flex flex-col gap-6 rounded-xl bg-white/70 p-6 backdrop-blur-sm transition-all duration-700 ease-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/20 dark:bg-black/20 dark:hover:shadow-black/40 md:p-10 lg:scroll-mt-32 ${
+      className={`transition-all duration-700 ease-out hover:-translate-y-2 lg:scroll-mt-32 ${
         revealed ? 'translate-x-0 opacity-100' : 'translate-x-16 opacity-0'
       }`}
     >
-      <h3 className="text-xl font-medium text-neutral-900 dark:text-white md:text-2xl">{project.title}</h3>
+      <BorderGlow
+        className="h-full"
+        backgroundColor="var(--card-surface)"
+        borderRadius={12}
+        glowColor="205 90 62"
+        glowRadius={32}
+        glowIntensity={1}
+        coneSpread={25}
+        colors={['#c084fc', '#f472b6', '#38bdf8']}
+      >
+        <div className="flex flex-col gap-6 p-6 md:p-10">
+          <h3 className="text-xl font-medium text-neutral-900 dark:text-white md:text-2xl">{project.title}</h3>
 
-      {/* Image (or placeholder) */}
-      <div className="flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-black/5 dark:bg-white/5">
-        {project.image ? (
+      {/* Video, image, or placeholder */}
+      <div
+        className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-black/5 dark:bg-white/5"
+        onMouseEnter={project.video ? handleEnter : undefined}
+        onMouseLeave={project.video ? handleLeave : undefined}
+      >
+        {project.video ? (
+          <>
+            <video
+              ref={videoRef}
+              src={project.video}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out ${
+                hovered ? 'opacity-100' : 'opacity-0'
+              }`}
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+            {project.image && (
+              <img
+                src={project.image}
+                alt={project.title}
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out ${
+                  hovered ? 'opacity-0' : 'opacity-100'
+                }`}
+              />
+            )}
+          </>
+        ) : project.image ? (
           <img
             src={project.image}
             alt={project.title}
@@ -292,7 +382,7 @@ function ProjectCard({
       {project.impact && (
         <div className="flex flex-col gap-1.5 rounded-lg bg-black/5 p-4 dark:bg-white/5 md:p-5">
           <MetaLabel>Impact</MetaLabel>
-          <p className="text-sm font-medium leading-relaxed text-neutral-900 dark:text-white md:text-base">
+          <p className="whitespace-pre-line text-sm font-medium leading-relaxed text-neutral-900 dark:text-white md:text-base">
             {highlightMetrics(project.impact)}
           </p>
         </div>
@@ -310,26 +400,24 @@ function ProjectCard({
         </div>
         <div className="flex items-center justify-end">
           <div className="flex items-center -space-x-2">
-            {project.team.map((key) => {
-              const member = TEAM[key]
-              if (!member) return null
-              return (
-                <div key={key} className="group/avatar relative">
-                  <img
-                    src={avatarSrc(key)}
-                    alt={member.name}
-                    className="h-10 w-10 rounded-full object-cover ring-2 ring-black/30 transition-transform duration-200 hover:z-10 hover:scale-105"
-                  />
-                  <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 whitespace-nowrap rounded-lg bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 opacity-0 shadow-lg transition-opacity duration-200 group-hover/avatar:opacity-100">
-                    <span className="absolute bottom-full right-4 border-4 border-transparent border-b-white" />
-                    {member.name}
-                  </span>
-                </div>
-              )
-            })}
+            {project.team.map((member, i) => (
+              <div key={i} className="group/avatar relative">
+                <img
+                  src={member.avatar}
+                  alt={member.name}
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-black/30 transition-transform duration-200 hover:z-10 hover:scale-105"
+                />
+                <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 whitespace-nowrap rounded-lg bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 opacity-0 shadow-lg transition-opacity duration-200 group-hover/avatar:opacity-100">
+                  <span className="absolute bottom-full right-4 border-4 border-transparent border-b-white" />
+                  {member.name}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+        </div>
+        </div>
+      </BorderGlow>
     </article>
   )
 }
@@ -349,17 +437,18 @@ export default function FeaturesSection() {
 
   return (
     <section className="relative px-5 py-20 md:px-10 md:py-40 lg:h-screen lg:overflow-hidden lg:px-16 lg:py-0">
-      {/* Fixed interactive dot-field background */}
+      {/* Fixed interactive dot-grid background (reacts to cursor + clicks) */}
       <div className="fixed inset-0 -z-10 bg-[#F4F1F8] dark:bg-[#120F17]">
-        <DotField
-          dotRadius={1.5}
-          dotSpacing={14}
-          bulgeStrength={67}
-          glowRadius={160}
-          sparkle={false}
-          waveAmplitude={0}
-          gradientFrom={theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : '#000000'}
-          gradientTo={theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : '#000000'}
+        <DotGrid
+          dotSize={3}
+          gap={17}
+          baseColor={theme === 'dark' ? '#26272f' : '#d4d0dd'}
+          activeColor={theme === 'dark' ? '#8ab4ff' : '#5227FF'}
+          proximity={150}
+          shockRadius={290}
+          shockStrength={6}
+          resistance={1550}
+          returnDuration={1.6}
         />
       </div>
 
@@ -406,8 +495,11 @@ export default function FeaturesSection() {
           </div>
         </div>
 
-        {/* Right column — the only scroller on desktop */}
-        <div className="scrollbar-hide flex flex-1 flex-col gap-16 md:gap-24 lg:h-screen lg:overflow-y-auto lg:py-32">
+        {/* Right column — the only scroller on desktop. The negative margin +
+            matching padding widen the scroll clip region so the cards'
+            BorderGlow isn't hard-clipped at the left/right edges (overflow-y
+            auto forces the x-axis to clip too). */}
+        <div className="scrollbar-hide flex flex-1 flex-col gap-16 md:gap-24 lg:-mx-10 lg:h-screen lg:overflow-y-auto lg:px-10 lg:py-32">
           {PROJECTS.map((project, i) => (
             <ProjectCard
               key={i}

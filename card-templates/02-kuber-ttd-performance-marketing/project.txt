@@ -2,6 +2,7 @@ TITLE: KUBER × TTD & Performance Marketing
 TEAM: Trista Chlorellano Garno
 TEAM AVATAR: Trista.png
 IMAGE:
+VIDEO:
 DESCRIPTION: Designed and executed alignment workshops to bridge TTD Commercial, Performance Marketing, and Pricing teams regarding needs on Pricing and Promo Dashboards.
 IMPACT: Directly resulted in >20 distinct items ready to act upon and >15 items funneled into planned technical development.
 START DATE: 30 Mar 2026
